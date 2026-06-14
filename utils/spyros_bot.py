@@ -1,22 +1,40 @@
 import streamlit as st
-import google.generativeai as genai
-from utils.prompts import SYSTEM_PROMPT
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-class SpyrosBot:
-    def __init__(self):
-        # Χρήση του μοντέλου που είδαμε στο AI Studio
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel("gemini-3-flash-preview")
-        
-        # Έναρξη chat με το system prompt ως αρχική οδηγία
-        self.chat_session = self.model.start_chat(history=[
-            {"role": "user", "parts": [SYSTEM_PROMPT]},
-            {"role": "model", "parts": ["Κατάλαβα. Είμαι ο Σπύρος, ο Pre-sales Engineer της Does4U. Είμαι έτοιμος να βοηθήσω τον πελάτη και να συλλέξω τα δεδομένα για το demo."]}
-        ])
+def send_lead_to_brevo(lead_data):
+    # Στοιχεία από τα secrets σου
+    smtp_server = "smtp-relay.brevo.com"
+    port = 587
+    sender_email = st.secrets["BREVO_LOGIN"]  # Το login που είδαμε στο Brevo
+    password = st.secrets["BREVO_SMTP_KEY"]   # Το νέο κλειδί που έφτιαξες
+    receiver_email = "does4u.ceo@gmail.com"
 
-    def get_response(self, user_input):
-        try:
-            response = self.chat_session.send_message(user_input)
-            return response.text
-        except Exception as e:
-            return f"Σφάλμα: {str(e)}"
+    # Δημιουργία μηνύματος
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+    msg['Subject'] = "Νέο Lead από τον Σπύρο!"
+    
+    body = f"Βρέθηκε ένα νέο lead με τα παρακάτω δεδομένα:\n\n{lead_data}"
+    msg.attach(MIMEText(body, 'plain'))
+
+    # Αποστολή μέσω Brevo SMTP
+    try:
+        server = smtplib.SMTP(smtp_server, port)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        st.error(f"Σφάλμα κατά την αποστολή: {e}")
+        return False
+
+# --- Πώς θα το χρησιμοποιείς στο τέλος των 5 βημάτων σου ---
+# Αν υποθέσουμε ότι το json_data είναι το τελικό σου αρχείο:
+# if st.button("Αποστολή Lead"):
+#     success = send_lead_to_brevo(str(json_data))
+#     if success:
+#         st.success("Το lead στάλθηκε με επιτυχία στο email σου!")
