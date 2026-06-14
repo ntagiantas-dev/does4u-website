@@ -4,15 +4,17 @@ from utils.prompts import SYSTEM_PROMPT
 
 class SpyrosBot:
     def __init__(self):
-        # Σύνδεση με το Gemini χρησιμοποιώντας το Secret
+        # Σύνδεση με Gemini - γίνεται μόνο μία φορά
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel("gemini-1.5-flash") # Το flash είναι ιδανικό για chat
+        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        # Ενεργοποιούμε το chat session με το system prompt μας
         self.chat_session = self.model.start_chat(history=[
             {"role": "user", "parts": [SYSTEM_PROMPT]},
-            {"role": "model", "parts": ["Κατάλαβα. Είμαι ο Σπύρος και είμαι έτοιμος να βοηθήσω τον πελάτη."]}
+            {"role": "model", "parts": ["Κατάλαβα. Είμαι ο Σπύρος, αναλυτής της Does4U. Είμαι έτοιμος."]}
         ])
 
-    def chat(self, user_input, history):
-        # Αποστολή ερωτήματος στο Gemini
+    def get_response(self, user_input):
+        # Απλή επιστροφή απάντησης
         response = self.chat_session.send_message(user_input)
         return response.text
