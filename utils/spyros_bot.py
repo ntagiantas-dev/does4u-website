@@ -9,7 +9,7 @@ class SpyrosBot:
             st.sidebar.write("DEBUG: Προσπάθεια σύνδεσης...")
             api_key = st.secrets["GEMINI_API_KEY"]
             genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel("gemini-1.5-flash")
+            self.model = genai.GenerativeModel("gemini-3-flash-preview")
             
             self.chat_session = self.model.start_chat(history=[
                 {"role": "user", "parts": [SYSTEM_PROMPT]},
