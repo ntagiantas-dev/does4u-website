@@ -1,40 +1,37 @@
 import streamlit as st
 import smtplib
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+class SpyrosBot:
+    def __init__(self):
+        self.is_finished = False
+        self.final_data = {}
+        # Εδώ θα βάλεις το logic σου για τα prompts
+        
+    def get_response(self, prompt):
+        # Εδώ η λογική που είχες για τον Σπύρο
+        # Όταν φτάσεις στο βήμα 5, κάνε:
+        # self.is_finished = True
+        # self.final_data = { ...τα δεδομένα σου... }
+        return "Απάντηση Σπύρου..."
+
+    def get_report(self):
+        return self.final_data
+
 def send_lead_to_brevo(lead_data):
-    # Στοιχεία από τα secrets σου
-    smtp_server = "smtp-relay.brevo.com"
-    port = 587
-    sender_email = st.secrets["BREVO_LOGIN"]  # Το login που είδαμε στο Brevo
-    password = st.secrets["BREVO_SMTP_KEY"]   # Το νέο κλειδί που έφτιαξες
-    receiver_email = "does4u.ceo@gmail.com"
-
-    # Δημιουργία μηνύματος
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = receiver_email
-    msg['Subject'] = "Νέο Lead από τον Σπύρο!"
-    
-    body = f"Βρέθηκε ένα νέο lead με τα παρακάτω δεδομένα:\n\n{lead_data}"
-    msg.attach(MIMEText(body, 'plain'))
-
-    # Αποστολή μέσω Brevo SMTP
     try:
-        server = smtplib.SMTP(smtp_server, port)
+        msg = MIMEMultipart()
+        msg['From'] = st.secrets["BREVO_LOGIN"]
+        msg['To'] = "does4u.ceo@gmail.com"
+        msg['Subject'] = "Νέο Lead από τον Σπύρο!"
+        msg.attach(MIMEText(json.dumps(lead_data, indent=4), 'plain'))
+        server = smtplib.SMTP("smtp-relay.brevo.com", 587)
         server.starttls()
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.login(st.secrets["BREVO_LOGIN"], st.secrets["BREVO_SMTP_KEY"])
+        server.sendmail(st.secrets["BREVO_LOGIN"], "does4u.ceo@gmail.com", msg.as_string())
         server.quit()
         return True
-    except Exception as e:
-        st.error(f"Σφάλμα κατά την αποστολή: {e}")
+    except:
         return False
-
-# --- Πώς θα το χρησιμοποιείς στο τέλος των 5 βημάτων σου ---
-# Αν υποθέσουμε ότι το json_data είναι το τελικό σου αρχείο:
-# if st.button("Αποστολή Lead"):
-#     success = send_lead_to_brevo(str(json_data))
-#     if success:
-#         st.success("Το lead στάλθηκε με επιτυχία στο email σου!")
