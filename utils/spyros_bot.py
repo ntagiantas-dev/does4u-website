@@ -6,8 +6,11 @@ class SpyrosBot:
     def __init__(self):
         # Σύνδεση με το Gemini χρησιμοποιώντας το Secret
         # Προσοχή: Το όνομα στο st.secrets πρέπει να είναι ακριβώς το ίδιο με αυτό που έβαλες στο Cloud
+        st.sidebar.write("DEBUG: Προσπάθεια σύνδεσης...")
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         self.model = genai.GenerativeModel("gemini-1.5-flash")
+        # ... τα υπόλοιπα
+        st.sidebar.write("DEBUG: Σύνδεση επιτυχής!")
         
         # Ξεκινάμε το chat session με το system prompt
         self.chat_session = self.model.start_chat(history=[
