@@ -15,7 +15,7 @@ SYSTEM_PROMPT = """
 
 class SpyrosBot:
     def __init__(self):
-        self.model = genai.GenerativeModel("gemini-1.5-flash") # 2.5 flash αν υπάρχει διαθέσιμο, αλλιώς 1.5
+        self.model = genai.GenerativeModel("gemini-2.5-flash") # 2.5 flash αν υπάρχει διαθέσιμο, αλλιώς 1.5
         self.chat = self.model.start_chat(history=[])
         # Αρχικοποίηση με το system prompt
         self.chat.send_message(SYSTEM_PROMPT)
