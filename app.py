@@ -27,11 +27,11 @@ with col1:
     st.write("Οι επαναλαμβανόμενες εργασίες τρώνε τον χρόνο σου. Εμείς χτίζουμε το ψηφιακό σου 'χέρι'.")
     st.markdown("* **Data Accuracy:** Τέλος στα λάθη.\n* **Speed:** Δουλειά ημερών σε λεπτά.\n* **Scalability:** Συστήματα που δουλεύουν 24/7.")
 with col2:
-    st.markdown('<div class="card">### Our Expertise\n🔹 Web Scraping\n🔹 Excel Automation\n🔹 AI Workflows\n🔹 Custom Scripts</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">### Our Expertise<br>🔹 Web Scraping<br>🔹 Excel Automation<br>🔹 AI Workflows<br>🔹 Custom Scripts</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
-# --- 4. Logic & Email ---
+# --- 4. Email Logic ---
 def send_lead_to_brevo(lead_data):
     try:
         sender_email = st.secrets["BREVO_LOGIN"]
@@ -41,40 +41,98 @@ def send_lead_to_brevo(lead_data):
         msg['To'] = "does4u.ceo@gmail.com"
         msg['Subject'] = "Νέο Lead από τον Σπύρο!"
         msg.attach(MIMEText(json.dumps(lead_data, indent=4, ensure_ascii=False), 'plain'))
-        
         server = smtplib.SMTP("smtp-relay.brevo.com", 587)
         server.starttls()
         server.login(sender_email, password)
         server.sendmail(sender_email, "does4u.ceo@gmail.com", msg.as_string())
         server.quit()
         return True
-    except: return False
+    except Exception as e:
+        st.error(f"Σφάλμα αποστολής: {e}")
+        return False
 
-# --- 5. Sidebar Chat (Spyros) ---
-if "spyros" not in st.session_state: st.session_state.spyros = SpyrosBot()
-if "messages" not in st.session_state: st.session_state.messages = []
-if "lead_confirmed" not in st.session_state: st.session_state.lead_confirmed = False
+# --- 5. Session State Initialization ---
+if "spyros" not in st.session_state:
+    st.session_state.spyros = SpyrosBot()
+    # Το πρώτο μήνυμα (greeting) έχει ήδη δημιουργηθεί στο __init__
+    # Το προσθέτουμε στα messages για εμφάνιση
+    st.session_state.messages = [
+        {"role": "assistant", "content": st.session_state.spyros.get_greeting()}
+    ]
 
+if "lead_confirmed" not in st.session_state:
+    st.session_state.lead_confirmed = False
+
+# --- 6. Sidebar Chat ---
 with st.sidebar:
-    st.header("Μίλα με τον Σπύρο")
+    st.header("💬 Μίλα με τον Σπύρο")
+    st.caption("Pre-sales Engineer · Does4U")
+
+    # Εμφάνιση ιστορικού
     for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]): st.markdown(msg["content"])
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Περίγραψε το πρόβλημά σου..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"): st.markdown(prompt)
-        response = st.session_state.spyros.get_response(prompt)
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.rerun()
+    # Input πελάτη (disabled αν έχει ολοκληρωθεί)
+    if not st.session_state.spyros.is_finished:
+        if prompt := st.chat_input("Γράψε εδώ..."):
+            # Εμφάνιση μηνύματος χρήστη
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-# --- 6. Handover Logic ---
-if hasattr(st.session_state.spyros, 'is_finished') and st.session_state.spyros.is_finished:
+            # Απάντηση Σπύρου
+            with st.chat_message("assistant"):
+                with st.spinner("Ο Σπύρος σκέφτεται..."):
+                    response = st.session_state.spyros.get_response(prompt)
+                st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+            st.rerun()
+    else:
+        st.chat_input("Η συνομιλία ολοκληρώθηκε ✓", disabled=True)
+
+# --- 7. Handover Logic (Main Area) ---
+if st.session_state.spyros.is_finished:
+    st.markdown("## 📋 Report Πελάτη")
+
     if not st.session_state.lead_confirmed:
         data = st.session_state.spyros.get_report()
-        st.table(data)
-        if st.button("Επιβεβαίωση και Αποστολή"):
-            if send_lead_to_brevo(data):
-                st.session_state.lead_confirmed = True
-                st.rerun()
+
+        # Εμφάνιση δεδομένων σε καθαρή μορφή
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(f"**👤 Όνομα:** {data.get('name', '-')}")
+            st.markdown(f"**📧 Email:** {data.get('email', '-')}")
+            st.markdown(f"**🏢 Εταιρεία:** {data.get('company', '-')}")
+            st.markdown(f"**📊 Εκτιμώμενος Όγκος:** {data.get('estimated_volume', '-')}")
+        with col_b:
+            st.markdown(f"**🔧 Τρέχουσα Διαδικασία:** {data.get('current_process', '-')}")
+            st.markdown(f"**🎯 Επιθυμητό Αποτέλεσμα:** {data.get('desired_outcome', '-')}")
+
+        st.markdown(f"**📝 Περιγραφή Προβλήματος:** {data.get('problem_description', '-')}")
+
+        if data.get('additional_notes'):
+            st.markdown(f"**💡 Επιπλέον Σημειώσεις:** {data.get('additional_notes', '-')}")
+
+        st.markdown("---")
+        st.markdown("**Raw JSON:**")
+        st.json(data)
+
+        if st.button("✅ Επιβεβαίωση και Αποστολή στην Ομάδα", type="primary"):
+            with st.spinner("Αποστολή..."):
+                if send_lead_to_brevo(data):
+                    st.session_state.lead_confirmed = True
+                    st.rerun()
     else:
-        st.success("Ευχαριστούμε! Η ομάδα της Does4U θα επικοινωνήσει μαζί σας εντός 2-3 εργάσιμων ημερών με το demo σας.")
+        st.success("""
+        ✅ **Το αίτημά σας στάλθηκε επιτυχώς!**
+        
+        Η ομάδα της Does4U έλαβε τις πληροφορίες σας.
+        Θα επικοινωνήσουμε μαζί σας εντός **2-5 εργάσιμων ημερών** με:
+        
+        - 🎬 **Demo** της προτεινόμενης λύσης
+        - 💰 **Κοστολόγηση** βάσει των απαιτήσεών σας
+        
+        Ευχαριστούμε που επιλέξατε την **Does4U**!
+        """)
