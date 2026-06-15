@@ -19,7 +19,7 @@ st.markdown("""
 
 # --- 3. Landing Page ---
 st.markdown('<p class="main-title">Does4U</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Automating the tedious, so you can focus on growth.</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Automation Solution That Save Time</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 1])
 with col1:
@@ -27,7 +27,7 @@ with col1:
     st.write("Οι επαναλαμβανόμενες εργασίες τρώνε τον χρόνο σου. Εμείς χτίζουμε το ψηφιακό σου 'χέρι'.")
     st.markdown("* **Data Accuracy:** Τέλος στα λάθη.\n* **Speed:** Δουλειά ημερών σε λεπτά.\n* **Scalability:** Συστήματα που δουλεύουν 24/7.")
 with col2:
-    st.markdown('<div class="card">### Our Expertise<br>🔹 Web Scraping<br>🔹 Excel Automation<br>🔹 AI Workflows<br>🔹 Custom Scripts</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">What we automate<br>🔹 Web Scraping<br>🔹 Excel Automation<br>🔹 AI Workflows<br>🔹 Custom Scripts</div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
