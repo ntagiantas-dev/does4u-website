@@ -254,7 +254,7 @@ with tab_main:
                         st.rerun()
         else:
             st.success("✅ Το αίτημά σας στάλθηκε! Θα επικοινωνήσουμε εντός 2-5 εργάσιμων ημερών με demo και κοστολόγηση.")
-    else:
+    elif len(st.session_state.messages) <= 1:
         st.markdown('<p class="hero-eyebrow">Python · AI · Automation</p>', unsafe_allow_html=True)
         st.markdown('<h1 class="hero-title">Automation Solutions<br>for <span>Any Business</span></h1>', unsafe_allow_html=True)
         st.markdown('<p class="hero-subtitle">We automate repetitive tasks using Python, AI and custom integrations — so your team focuses on what actually matters.</p>', unsafe_allow_html=True)
