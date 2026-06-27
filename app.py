@@ -4,7 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from utils.spyros import SpyrosBot
+from utils.spyros_bot import SpyrosBot
 
 # --- 1. Ρύθμιση Σελίδας ---
 st.set_page_config(
