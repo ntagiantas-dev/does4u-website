@@ -2,7 +2,7 @@ import streamlit as st
 from tabs.main_tab import render_main_tab
 from tabs.blog_tab import render_blog_tab
 from tabs.demos_tab import render_demos_tab
-
+from tabs.admin_tab import render_admin_tab
 
 # ============================================
 # PAGE CONFIG
@@ -33,12 +33,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# MAIN APP - 3 TABS
+# MAIN APP - 4 TABS
 # ============================================
-tab_main, tab_blog, tab_demos = st.tabs([
+tab_main, tab_blog, tab_demos, tab_admin = st.tabs([
     "🏠 Main",
     "📰 Blog", 
-    "🎯 Demos"
+    "🎯 Demos",
+    "⚙️ Admin"
 ])
 
 with tab_main:
@@ -49,6 +50,9 @@ with tab_blog:
 
 with tab_demos:
     render_demos_tab()
+
+with tab_admin:
+    render_admin_tab()
 
 # ============================================
 # FOOTER
