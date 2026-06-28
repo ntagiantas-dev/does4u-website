@@ -29,30 +29,98 @@ st.markdown("""
     .stTabs [role="tab"] {
         transition: all 0.3s ease;
     }
+    
+    /* Admin unlock form styling */
+    .admin-unlock-form {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        z-index: 999;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# MAIN APP - 4 TABS
+# ADMIN UNLOCK SYSTEM
 # ============================================
-tab_main, tab_blog, tab_demos, tab_admin = st.tabs([
+
+# Initialize session state for admin access
+if "admin_unlocked" not in st.session_state:
+    st.session_state.admin_unlocked = False
+
+def check_admin_password(password: str) -> bool:
+    """Check if password matches the admin password from secrets"""
+    try:
+        admin_password = st.secrets.get("ADMIN_PASSWORD", "")
+        return password == admin_password and password != ""
+    except:
+        return False
+
+# Hidden admin unlock form (bottom right corner)
+with st.container():
+    st.markdown("""
+    <div style="position: fixed; bottom: 20px; right: 20px; background: white; padding: 15px; 
+    border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 999;">
+    """, unsafe_allow_html=True)
+    
+    # Compact unlock form
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        admin_pass = st.text_input(
+            "🔐",
+            type="password",
+            placeholder="Admin access",
+            label_visibility="collapsed",
+            key="admin_password_input"
+        )
+    
+    with col2:
+        if st.button("🔓", key="admin_unlock_btn", help="Unlock admin panel"):
+            if check_admin_password(admin_pass):
+                st.session_state.admin_unlocked = True
+                st.success("✅ Admin unlocked!")
+                st.rerun()
+            else:
+                st.error("❌ Wrong password")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ============================================
+# MAIN APP - DYNAMIC TABS
+# ============================================
+
+# Build tabs list based on admin status
+tabs_list = [
     "🏠 Main",
     "📰 Blog", 
-    "🎯 Demos",
-    "⚙️ Admin"
-])
+    "🎯 Demos"
+]
 
-with tab_main:
+# Add admin tab only if unlocked
+if st.session_state.admin_unlocked:
+    tabs_list.append("⚙️ Admin")
+
+# Create tabs
+tabs = st.tabs(tabs_list)
+
+# Render tabs based on admin status
+with tabs[0]:
     render_main_tab()
 
-with tab_blog:
+with tabs[1]:
     render_blog_tab()
 
-with tab_demos:
+with tabs[2]:
     render_demos_tab()
 
-with tab_admin:
-    render_admin_tab()
+# Admin tab only visible if unlocked
+if st.session_state.admin_unlocked and len(tabs_list) == 4:
+    with tabs[3]:
+        render_admin_tab()
 
 # ============================================
 # FOOTER
