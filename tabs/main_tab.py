@@ -1,9 +1,9 @@
 import streamlit as st
-from utils.spyros_bot import SpyrosBot
+from utils.email_service import EmailService
 
 
 def render_main_tab():
-    """Landing page with hero + features + Spyros chat"""
+    """Landing page with hero + features + lead capture form"""
     
     # ============================================
     # CUSTOM CSS - Python Colors
@@ -75,29 +75,128 @@ def render_main_tab():
             line-height: 1.6;
         }
         
-        /* Chat Container */
-        .chat-container {
+        /* Welcome Section */
+        .welcome-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 6px solid #FFD43B;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .welcome-box h2 {
+            color: #3776ab;
+            font-size: 1.4em;
+            margin-bottom: 12px;
+            margin-top: 0;
+        }
+        
+        .welcome-box p {
+            color: #555;
+            font-size: 1em;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+        
+        /* Progress Tracker */
+        .progress-tracker {
+            background: white;
+            border: 2px solid #3776ab;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .progress-tracker h3 {
+            color: #3776ab;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            margin-top: 0;
+            font-weight: 700;
+        }
+        
+        .tracker-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.95em;
+        }
+        
+        .tracker-status {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 20px;
+            font-size: 0.8em;
+        }
+        
+        .status-empty {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .status-filled {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .tracker-label {
+            color: #555;
+        }
+        
+        .tracker-label .required {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        /* Form Container */
+        .form-container {
             background: white;
             border-left: 8px solid #3776ab;
             border-radius: 8px;
-            padding: 25px;
+            padding: 30px;
             margin-top: 40px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .form-title {
+            color: #3776ab;
+            font-weight: 700;
+            font-size: 1.5em;
             margin-bottom: 20px;
-            padding-bottom: 15px;
             border-bottom: 3px solid #FFD43B;
+            padding-bottom: 15px;
         }
         
-        .chat-header h2 {
+        .form-section {
+            margin: 20px 0;
+        }
+        
+        .form-section-title {
             color: #3776ab;
-            margin: 0;
-            font-size: 1.5em;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .required-asterisk {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .form-hint {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-style: italic;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -105,17 +204,11 @@ def render_main_tab():
     # ============================================
     # STATE MANAGEMENT
     # ============================================
-    if "show_spyros_chat" not in st.session_state:
-        st.session_state.show_spyros_chat = False
+    if "form_submitted" not in st.session_state:
+        st.session_state.form_submitted = False
     
-    if "spyros_messages" not in st.session_state:
-        st.session_state.spyros_messages = []
-    
-    if "spyros" not in st.session_state:
-        try:
-            st.session_state.spyros = SpyrosBot(api_key=st.secrets["OPENAI_API_KEY"])
-        except:
-            st.session_state.spyros = None
+    if "form_data" not in st.session_state:
+        st.session_state.form_data = None
     
     # ============================================
     # HERO SECTION
@@ -178,63 +271,237 @@ def render_main_tab():
             cols = st.columns(3)
     
     # ============================================
-    # CTA SECTION
+    # WELCOME SECTION
     # ============================================
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<h2 style='color: #3776ab; text-align: center; margin-bottom: 20px;'>Ready to Automate?</h2>", unsafe_allow_html=True)
-        
-        if st.button("💬 Chat with Spyros", key="open_spyros", use_container_width=True):
-            st.session_state.show_spyros_chat = True
-            st.rerun()
+    st.markdown("""
+    <div class="welcome-box">
+        <h2>👋 Welcome!</h2>
+        <p>Great to meet you! We understand that running a business means dealing with repetitive, time-consuming tasks. Whether it's copying data between systems, generating reports, or managing leads – we've got solutions.</p>
+        <p><strong>Here's how we work:</strong></p>
+        <p><strong>Step 1:</strong> You tell us about your problem<br>
+        <strong>Step 2:</strong> We analyze your needs and provide a quote<br>
+        <strong>Step 3:</strong> We build & deploy your automation</p>
+        <p style="margin-bottom: 0;"><em>Let's get started! Please fill in the form below so we can understand your specific needs.</em></p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # ============================================
-    # SPYROS CHAT SECTION
+    # LEAD CAPTURE FORM
     # ============================================
-    if st.session_state.show_spyros_chat:
-        st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+    st.markdown("<div class='form-container'>", unsafe_allow_html=True)
+    st.markdown("<div class='form-title'>📋 Let's Get Started</div>", unsafe_allow_html=True)
+    
+    # Initialize form state tracking
+    if "form_values" not in st.session_state:
+        st.session_state.form_values = {
+            "name": "",
+            "email": "",
+            "company": "",
+            "problem": "",
+            "current": "",
+            "desired": "",
+            "volume": ""
+        }
+    
+    with st.form("lead_form", clear_on_submit=False):
+        # ============================================
+        # PROGRESS TRACKER
+        # ============================================
+        st.markdown("<div class='progress-tracker'>", unsafe_allow_html=True)
+        st.markdown("<h3>📊 Form Progress</h3>", unsafe_allow_html=True)
         
-        # Chat header with close button
-        col_title, col_close = st.columns([4, 1])
-        with col_title:
-            st.markdown("<div class='chat-header'><h2>🤖 Spyros - Pre-Sales AI Assistant</h2>", unsafe_allow_html=True)
-        with col_close:
-            if st.button("✕ Close", key="close_spyros"):
-                st.session_state.show_spyros_chat = False
-                st.session_state.spyros_messages = []
-                st.rerun()
+        # Collect values for tracking (temporary, just for display)
+        tracker_items = [
+            ("name", "👤 Full Name"),
+            ("email", "📧 Email Address"),
+            ("company", "🏢 Company Name"),
+            ("problem", "🎯 Problem Description"),
+            ("current", "⚙️ Current Process"),
+            ("desired", "✨ Desired Outcome"),
+            ("volume", "📈 Data Volume")
+        ]
+        
+        for field_key, field_label in tracker_items:
+            status_icon = "✓"
+            status_class = "status-filled"
+            label_color = "color: #27ae60;"
+        
+            st.markdown(f"""
+            <div class="tracker-item">
+                <div class="tracker-status {status_class}">{status_icon}</div>
+                <div class="tracker-label" style="{label_color}">{field_label} <span class="required">*</span></div>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # Display chat messages
-        if st.session_state.spyros and len(st.session_state.spyros_messages) > 0:
-            for message in st.session_state.spyros_messages:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-        elif st.session_state.spyros is None:
-            st.error("⚠️ Could not initialize Spyros. Check your OPENAI_API_KEY in Streamlit secrets.")
+        # ============================================
+        # CONTACT INFORMATION SECTION
+        # ============================================
+        st.markdown("<div class='form-section-title'>👤 Contact Information</div>", unsafe_allow_html=True)
         
-        # Chat input
-        if st.session_state.spyros:
-            if user_input := st.chat_input("Tell me about your business needs..."):
-                # Add user message
-                st.session_state.spyros_messages.append({"role": "user", "content": user_input})
-                
-                with st.chat_message("user"):
-                    st.markdown(user_input)
-                
-                # Get Spyros response
-                with st.chat_message("assistant"):
-                    with st.spinner("Spyros is thinking..."):
-                        try:
-                            response = st.session_state.spyros.chat(user_input)
-                            st.markdown(response)
-                            st.session_state.spyros_messages.append({"role": "assistant", "content": response})
-                        except Exception as e:
-                            st.error(f"Error: {str(e)}")
+        col1, col2 = st.columns(2)
         
-        st.markdown("</div>", unsafe_allow_html=True)
+        with col1:
+            name = st.text_input(
+                "Full Name *",
+                placeholder="John Doe",
+                key="form_name"
+            )
+        
+        with col2:
+            email = st.text_input(
+                "Email Address *",
+                placeholder="john@company.com",
+                key="form_email"
+            )
+        
+        company = st.text_input(
+            "Company Name *",
+            placeholder="Your Company",
+            key="form_company"
+        )
+        
+        # ============================================
+        # PROBLEM & SOLUTION SECTION
+        # ============================================
+        st.markdown("<div class='form-section-title'>🎯 Problem & Solution</div>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #666; font-size: 0.9em; margin-top: -10px;'>Help us understand your automation needs</p>", unsafe_allow_html=True)
+        
+        problem = st.text_area(
+            "What problem do you want to automate? *",
+            placeholder="Describe the repetitive task or problem you face...",
+            height=100,
+            key="form_problem"
+        )
+        st.markdown("<p class='form-hint'>💡 Example: We manually copy customer data from emails into Excel daily</p>", unsafe_allow_html=True)
+        
+        current = st.text_area(
+            "How does it work now? (current process) *",
+            placeholder="Briefly describe your current manual process...",
+            height=80,
+            key="form_current"
+        )
+        st.markdown("<p class='form-hint'>💡 Example: Sales team receives emails and manually updates spreadsheet</p>", unsafe_allow_html=True)
+        
+        desired = st.text_area(
+            "What should happen automatically? (desired outcome) *",
+            placeholder="Describe your ideal automated outcome...",
+            height=80,
+            key="form_desired"
+        )
+        st.markdown("<p class='form-hint'>💡 Example: Data goes directly from email to Excel sheet without manual work</p>", unsafe_allow_html=True)
+        
+        # ============================================
+        # TECHNICAL DETAILS SECTION
+        # ============================================
+        st.markdown("<div class='form-section-title'>🔧 Technical Details</div>", unsafe_allow_html=True)
+        
+        websites = st.text_input(
+            "Websites involved (comma-separated)",
+            placeholder="example.com, site2.com",
+            key="form_websites"
+        )
+        
+        documents = st.text_input(
+            "Document types involved (Excel, PDF, etc.)",
+            placeholder="Excel, PDF, CSV",
+            key="form_documents"
+        )
+        
+        volume = st.text_input(
+            "Estimated data volume *",
+            placeholder="e.g., 1000 records/day, 500 files/month",
+            key="form_volume"
+        )
+        st.markdown("<p class='form-hint'>💡 This helps us understand the scale and choose the right solution</p>", unsafe_allow_html=True)
+        
+        # ============================================
+        # ADDITIONAL NOTES SECTION
+        # ============================================
+        st.markdown("<div class='form-section-title'>📝 Additional Information</div>", unsafe_allow_html=True)
+        
+        notes = st.text_area(
+            "Anything else we should know? (optional)",
+            placeholder="Any additional context or requirements...",
+            height=80,
+            key="form_notes"
+        )
+        
+        # ============================================
+        # SUBMIT BUTTON
+        # ============================================
+        st.markdown("---")
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            submitted = st.form_submit_button("📤 Submit & Send Report", use_container_width=True)
+        
+        # ============================================
+        # FORM VALIDATION & SUBMISSION
+        # ============================================
+        if submitted:
+            # Validation
+            errors = []
+            
+            if not name or name.strip() == "":
+                errors.append("❌ Full Name is required")
+            if not email or email.strip() == "" or "@" not in email:
+                errors.append("❌ Valid Email is required")
+            if not company or company.strip() == "":
+                errors.append("❌ Company Name is required")
+            if not problem or problem.strip() == "":
+                errors.append("❌ Problem Description is required")
+            if not current or current.strip() == "":
+                errors.append("❌ Current Process is required")
+            if not desired or desired.strip() == "":
+                errors.append("❌ Desired Outcome is required")
+            if not volume or volume.strip() == "":
+                errors.append("❌ Estimated Volume is required")
+            
+            # Show errors
+            if errors:
+                st.error("⚠️ Please fix the following errors:")
+                for error in errors:
+                    st.error(error)
+            
+            # Submit if valid
+            else:
+                form_data = {
+                    "name": name.strip(),
+                    "email": email.strip(),
+                    "company": company.strip(),
+                    "problem_description": problem.strip(),
+                    "current_process": current.strip(),
+                    "desired_outcome": desired.strip(),
+                    "websites": [w.strip() for w in websites.split(",") if w.strip()],
+                    "documents": [d.strip() for d in documents.split(",") if d.strip()],
+                    "estimated_volume": volume.strip(),
+                    "additional_notes": notes.strip() if notes else ""
+                }
+                
+                # Send email
+                email_service = EmailService()
+                success, message = email_service.send_report(form_data)
+                
+                if success:
+                    st.success("✅ " + message)
+                    st.info("📧 We've received your information. Our team will contact you shortly to discuss your automation needs.")
+                    st.session_state.form_submitted = True
+                else:
+                    st.error("❌ " + message)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # ============================================
+    # FOOTER NOTE
+    # ============================================
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; color: #999; font-size: 0.9em; padding: 20px;">
+        <p>🔒 Your information is secure and will only be used to discuss your automation needs.</p>
+        <p>Questions? Reach out to us at <strong>does4u.ceo@gmail.com</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================
