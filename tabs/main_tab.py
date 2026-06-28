@@ -278,10 +278,10 @@ def render_main_tab():
         <h2>👋 Welcome!</h2>
         <p>Great to meet you! We understand that running a business means dealing with repetitive, time-consuming tasks. Whether it's copying data between systems, generating reports, or managing leads – we've got solutions.</p>
         <p><strong>Here's how we work:</strong></p>
-        <p><strong>Step 1:</strong> You tell us about your problem<br>
-        <strong>Step 2:</strong> We analyze your needs and provide a quote<br>
-        <strong>Step 3:</strong> We build & deploy your automation</p>
-        <p style="margin-bottom: 0;"><em>Let's get started! Please fill in the form below so we can understand your specific needs.</em></p>
+        <p><strong>Step 1 - You Tell Us Your Problem:</strong> Fill out this form with details about your automation needs and current workflow<br>
+        <strong>Step 2 - We Review & Analyze:</strong> Our team carefully evaluates your specific situation to understand the scope and requirements<br>
+        <strong>Step 3 - Custom Solution:</strong> We design and implement a tailored automation solution perfectly fitted to YOUR needs</p>
+        <p style="margin-bottom: 0;"><em>Let's get started! Please fill in the form below so we can provide you with an accurate quote and timeline.</em></p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -309,6 +309,7 @@ def render_main_tab():
         # ============================================
         st.markdown("<div class='progress-tracker'>", unsafe_allow_html=True)
         st.markdown("<h3>📊 Form Progress</h3>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #666; font-size: 0.9em; margin-top: -10px;'>Fill in all required fields so we can give you an accurate quote</p>", unsafe_allow_html=True)
         
         # Collect values for tracking (temporary, just for display)
         tracker_items = [
@@ -366,7 +367,7 @@ def render_main_tab():
         # PROBLEM & SOLUTION SECTION
         # ============================================
         st.markdown("<div class='form-section-title'>🎯 Problem & Solution</div>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #666; font-size: 0.9em; margin-top: -10px;'>Help us understand your automation needs</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #666; font-size: 0.9em; margin-top: -10px;'>Help us understand your specific automation challenge in detail</p>", unsafe_allow_html=True)
         
         problem = st.text_area(
             "What problem do you want to automate? *",
@@ -485,7 +486,7 @@ def render_main_tab():
                 
                 if success:
                     st.success("✅ " + message)
-                    st.info("📧 We've received your information. Our team will contact you shortly to discuss your automation needs.")
+                    st.info("📧 We've received your information. Our team will review your needs and contact you with a customized quote.")
                     st.session_state.form_submitted = True
                 else:
                     st.error("❌ " + message)
