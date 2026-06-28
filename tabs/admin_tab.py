@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 from typing import List, Dict, Optional
 import uuid
-from utils.jina_service import JinaService
-from utils.article_generator import ArticleGenerator
 
 
 # ============================================
@@ -307,15 +305,16 @@ def render_admin_tab():
         st.markdown("</div>", unsafe_allow_html=True)
         
         # ============================================
-        # GENERATION LOGIC
+        # GENERATION LOGIC - LAZY LOADING
         # ============================================
         if generate_btn:
             if not target_point or not category:
                 st.error("❌ Please fill in all required fields")
             else:
-                # Step 1: Extract content with Jina
+                # Step 1: Extract content with Jina (LAZY LOAD)
                 with st.spinner("🔍 Extracting content from web..."):
                     try:
+                        from utils.jina_service import JinaService
                         jina_service = JinaService()
                         extracted_data = jina_service.search_and_extract(target_point)
                     except Exception as e:
@@ -323,8 +322,9 @@ def render_admin_tab():
                         extracted_data = None
                 
                 if extracted_data:
-                    # Step 2: Generate article + teasers
+                    # Step 2: Generate article + teasers (LAZY LOAD)
                     try:
+                        from utils.article_generator import ArticleGenerator
                         generator = ArticleGenerator()
                         result = generator.full_pipeline(
                             extracted_content=extracted_data.get("content", ""),
