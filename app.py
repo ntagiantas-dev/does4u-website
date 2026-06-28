@@ -1,7 +1,7 @@
 import streamlit as st
 from tabs.main_tab import render_main_tab
-from tabs.blog import render_blog_tab
-from tabs.demos import render_demos_tab
+from tabs.blog_tab import render_blog_tab
+from tabs.demos_tab import render_demos_tab
 
 
 # ============================================
